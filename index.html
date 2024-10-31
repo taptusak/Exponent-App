@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exponent App with Combined Properties</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            width: 80%; /* ทำให้ป้อนข้อมูลได้ง่ายขึ้น */
+            max-width: 300px; /* กำหนดขนาดสูงสุด */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #question {
+            font-size: 24px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        #result {
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #explanation {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exponent App</h1>
+    <div id="question">โจทย์: </div>
+    <input type="number" id="answer" placeholder="ใส่คำตอบของคุณ">
+    <button onclick="checkAnswer()">ตกลง</button>
+    <div id="result"></div>
+    <div id="explanation"></div>
+    <button onclick="generateQuestion()">สร้างโจทย์ใหม่</button>
+
+    <script>
+        let base1, base2, exp1, exp2, correctAnswer, questionText;
+
+        function generateQuestion() {
+            // สุ่มค่าฐานและเลขชี้กำลัง
+            base1 = Math.floor(Math.random() * 4) + 2; // ค่าฐานตั้งแต่ 2 ถึง 5
+            base2 = Math.floor(Math.random() * 4) + 2; // ค่าฐานตั้งแต่ 2 ถึง 5
+            exp1 = Math.floor(Math.random() * 3) + 1;  // เลขชี้กำลังตั้งแต่ 1 ถึง 3
+            exp2 = Math.floor(Math.random() * 3) + 1;  // เลขชี้กำลังตั้งแต่ 1 ถึง 3
+
+            // สุ่มสมบัติที่ต้องการใช้ในโจทย์
+            const properties = [
+                {type: "multiply", expression: `${base1}<sup>${exp1}</sup> * ${base1}<sup>${exp2}</sup>`, answer: Math.pow(base1, exp1 + exp2)},
+                {type: "divide", expression: `${base1}<sup>${exp1}</sup> / ${base1}<sup>${exp2}</sup>`, answer: Math.pow(base1, exp1 - exp2)},
+                {type: "power", expression: `(${base1}<sup>${exp1}</sup>)<sup>${exp2}</sup>`, answer: Math.pow(base1, exp1 * exp2)},
+                {type: "distributeMultiplication", expression: `(${base1} * ${base2})<sup>${exp1}</sup>`, answer: Math.pow(base1, exp1) * Math.pow(base2, exp1)},
+                {type: "distributeDivision", expression: `(${base1} / ${base2})<sup>${exp1}</sup>`, answer: Math.floor(Math.pow(base1, exp1) / Math.pow(base2, exp1))},
+                {type: "zeroExponent", expression: `${base1}<sup>0</sup>`, answer: 1},
+                {type: "negativeExponent", expression: `${base1}<sup>-${exp1}</sup>`, answer: Math.floor(1 / Math.pow(base1, exp1))}
+            ];
+
+            // สุ่มสองสมบัติที่แตกต่างกันและตรวจสอบคำตอบไม่เกิน 100
+            let firstProperty, secondProperty;
+            do {
+                firstProperty = properties[Math.floor(Math.random() * properties.length)];
+                secondProperty = properties[Math.floor(Math.random() * properties.length)];
+            } while (firstProperty.type === secondProperty.type || (firstProperty.answer + secondProperty.answer) > 100);
+
+            // สร้างโจทย์ใหม่
+            questionText = `(${firstProperty.expression}) + (${secondProperty.expression}) = ?`;
+            correctAnswer = Math.floor(firstProperty.answer + secondProperty.answer); // ใช้ Math.floor เพื่อให้เป็นจำนวนเต็ม
+
+            // แสดงโจทย์
+            document.getElementById("question").innerHTML = `โจทย์: ${questionText}`;
+            
+            // รีเซ็ตผลลัพธ์และคำอธิบาย
+            document.getElementById("result").innerText = '';
+            document.getElementById("explanation").innerText = '';
+            document.getElementById("answer").value = '';
+        }
+
+        function checkAnswer() {
+            // รับค่าคำตอบจากผู้ใช้
+            let userAnswer = parseInt(document.getElementById("answer").value); // เปลี่ยนเป็น parseInt
+
+            if (userAnswer === correctAnswer) {  // เปรียบเทียบโดยตรง
+                document.getElementById("result").innerText = 'ถูกต้อง!';
+                document.getElementById("explanation").innerText = '';
+            } else {
+                document.getElementById("result").innerText = `ผิด! คำตอบที่ถูกคือ ${correctAnswer} (${correctAnswer})`;
+                document.getElementById("explanation").innerHTML = `วิธีคิด: <br>
+                ${firstProperty.type === "multiply" ? "ใช้สมบัติ (a^m * a^n) = a^(m+n)" : ""}
+                ${firstProperty.type === "divide" ? "ใช้สมบัติ (a^m / a^n) = a^(m-n)" : ""}
+                ${firstProperty.type === "power" ? "ใช้สมบัติ ((a^m)^n) = a^(m*n)" : ""}
+                ${secondProperty.type === "multiply" ? "ใช้สมบัติ (a^m * a^n) = a^(m+n)" : ""}
+                ${secondProperty.type === "divide" ? "ใช้สมบัติ (a^m / a^n) = a^(m-n)" : ""}
+                ${secondProperty.type === "power" ? "ใช้สมบัติ ((a^m)^n) = a^(m*n)" : ""}`;
+            }
+        }
+
+        // สร้างโจทย์ใหม่ทันทีที่โหลดหน้าเว็บ
+        generateQuestion();
+    </script>
+</body>
+</html>
